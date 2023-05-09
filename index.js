@@ -1,5 +1,6 @@
 
 import express from 'express';
+import { invokeFFmpegCommand, s3FileDownload, s3FileUpload } from './Utils.js';
 const app = express();
 const port = 3001;
 app.use(express.json());
@@ -34,4 +35,16 @@ app.post("/fruit/prices", (req, res) => {
     }
     fruit_prices = [...fruit_prices, item];
     res.send(fruit_prices);
+});
+
+app.post("/media", (req, res) => {
+    console.log("POST: access to /media");
+    const item = {
+        param: req.body,
+    }
+    s3FileDownload(req.body.key, "tmp2.mov").then((value) => {
+        invokeFFmpegCommand("tmp2.mov", "tmp.mov")
+        s3FileUpload(req.body.newKey, "tmp.mov");
+        res.send(item);  
+    }).catch((err)=>console.log(err));
 });
