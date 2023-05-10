@@ -11,7 +11,6 @@ RUN npm install
 COPY ./index.js ./
 cOPY ./Utils.js ./
 COPY ./.env ./
-COPY ./Sumire.mov ./tmp3.mov
 
 EXPOSE 3001
 

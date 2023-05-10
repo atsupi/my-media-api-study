@@ -21,23 +21,18 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 export async function s3FileDownload(key, localfile) {
+    console.log("s3FileDownload", key, path.join(__dirname, localfile));
+    console.log(process.env.S3_BUCKET_NAME);
     try {
-        const getObjectPromise = await s3.getObject({
+        const uploaded_data = await s3.getObject({
             Bucket: process.env.S3_BUCKET_NAME,
             Key: key
-        }, (err, data) => {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            const writer = fs.createWriteStream(path.join(__dirname, localfile));
-            writer.on("finish", () => {
-                console.log("success");
-            })
-            writer.write(data.Body);
-            writer.end();
-        }).promise();
-        return getObjectPromise;
+        }).promise()
+            .catch((err) => console.log(err));
+        fs.writeFileSync(
+            path.join(__dirname, localfile),
+            uploaded_data.Body
+        );
     } catch (err) {
         console.log(err);
     }
@@ -45,19 +40,13 @@ export async function s3FileDownload(key, localfile) {
 
 export async function s3FileUpload(key, localfile) {
     try {
-        const promiseUpload = await s3.upload({
+        await s3.putObject({
             Bucket: process.env.S3_BUCKET_NAME,
             Key: key,
             Body: fs.createReadStream(path.join(__dirname, localfile)),
             ContentType: "video/mp4"
-        }, (err, data) => {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            console.log(JSON.stringify(data));
-        }).promise();
-        return promiseUpload;
+        }).promise()
+            .catch((err) => console.log(err));
     } catch (err) {
         console.log(err);
     }
