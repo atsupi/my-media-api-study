@@ -6,10 +6,12 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
 import AWS from 'aws-sdk';
+import cors from 'cors';
 
 const app = express();
 const port = 3001;
 app.use(express.json());
+app.use(cors());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +46,7 @@ app.listen(port, () => {
 app.post("/media", async (req, res) => {
     console.log("POST: access to /media");
     const item = {
+        result: "201 OK",
         param: req.body,
     }
     console.log("s3FileDownload", req.body.key, path.join(__dirname, "tmp2.mov"));
@@ -63,5 +66,5 @@ app.post("/media", async (req, res) => {
     }
     invokeFFmpegCommand("tmp2.mov", "tmp.mov");
     s3FileUpload(req.body.newKey, "tmp.mov");
-    res.send(item);  
+    res.status(201).json(item);  
 });
